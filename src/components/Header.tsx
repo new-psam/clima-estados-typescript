@@ -1,16 +1,32 @@
-import { View, Text, StyleSheet, Platform } from "react-native";
+import React from "react";
+import { useNavigation } from "@react-navigation/native";
+import { View, Text, StyleSheet, Platform, Touchable, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 
 interface Props{
     title: string;
+    showBackButton?: boolean;
 }
 
-export default function Header({ title }: Props) {
+export default function Header({ title, showBackButton }: Props) {
+    const navigation = useNavigation();
     return (
         <View style ={styles.container}>
-            <View style={styles.logoRow}>
-                <Text style={styles.logoSymbol}>🌦️</Text>
-                <Text style={styles.logoText}>Clima Estados</Text>
+            <View style={styles.topRow}>
+                {showBackButton && (
+                    <TouchableOpacity 
+                        onPress={() => navigation.goBack()} 
+                        style={styles.backButton}
+                    >
+                        <Ionicons name="chevron-back" size={28} color="#fff" />
+                    </TouchableOpacity>
+                )}
+
+                <View style={styles.logoRow}>
+                    <Text style={styles.logoSymbol}>🌦️</Text>
+                    <Text style={styles.logoText}>Clima Estados</Text>
+                </View>
             </View>
             <Text style={styles.title}>{title}</Text>
         </View>
@@ -25,6 +41,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         alignItems: 'center',
         width: '100%',
+    },
+    topRow: { flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'center', paddingHorizontal: 10 },
+    backButton: {
+        position: 'absolute',
+        left: 10,
+        padding: 5,
     },
     logoRow: {  flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
     logoSymbol: {fontSize: 24, marginRight: 8, color: 'white', fontWeight: 'bold' },

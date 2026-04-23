@@ -5,41 +5,36 @@ import {
   StyleSheet,   
   StatusBar,
   SafeAreaView,
-  Alert 
+   
 } from 'react-native';
-//import { SafeAreaView } from "react-native-safe-area-context";
-//import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-//import { useNavigation } from "@react-navigation/native";
+
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+
 import { WeatherData } from "@/types/weather";
 import { CITIES_SP } from "@/data/cities";
 import CityCard from "@/components/CityCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { RootStackParamList } from "@/routes";
 
-
+// Tipagem para o hook de navegação, usando o RootStackParamList definido em src/routes/index.tsx
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'List'>;
 
 export default function ListScreen() {
-    
+
+    const navigation = useNavigation<NavigationProp>();    
     const [refreshing, setRefreshing] = useState(false);
 
     // Função para o Pull-to-Refresh (conforme seu PDF)
     const onRefresh = () => {
         setRefreshing(true);
         // Simula um tempo de atualização (pode ser substituído por lógica real de atualização)
-        setTimeout(() => {
-            setRefreshing(false);
-            Alert
-        }, 2000);   
+        setTimeout(() =>  setRefreshing(false), 2000);   
     };
 
     const handlePressCity = (data: WeatherData) => {
-        Alert.alert(
-            `Detalhes de ${data.name}`,
-            `Temperatura: ${Math.round(data.main.temp)}°C\n` +
-            `Descrição: ${data.weather[0].description}\n` +
-            `Umidade: ${data.main.humidity}%\n` +
-            `Vento: ${data.wind.speed} m/s`
-        );
+        navigation.navigate('Details', { cityData: data }); // Navega para a tela de detalhes passando os dados do clima
     };
 
     return (
@@ -59,7 +54,7 @@ export default function ListScreen() {
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
 
-                
+
                 // --- Performance (Conforme seu PDF) ---
                 initialNumToRender={8} // Renderiza 8 itens logo de cara
                 maxToRenderPerBatch={5} // Renderiza no máximo 5 itens por batch (rolagem)
