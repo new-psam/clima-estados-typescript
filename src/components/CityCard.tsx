@@ -53,8 +53,8 @@ export default function CityCard({ city, onPress }: Props) {
             <View style={styles.tempGroup}>
                 <Text style={styles.currentTemp}>{Math.round(data.main.temp)}°C</Text>
                 <View style={styles.minMaxGroup}>
-                    <Text style={styles.tempMax}>↑ {Math.round(data.main.temp_max)}°C</Text>
                     <Text style={styles.tempMin}>↓ {Math.round(data.main.temp_min)}°C</Text>
+                    <Text style={styles.tempMax}>↑ {Math.round(data.main.temp_max)}°C</Text>
                 </View>
             </View>
 
