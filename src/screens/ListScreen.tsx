@@ -17,6 +17,7 @@ import CityCard from "@/components/CityCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { RootStackParamList } from "@/routes";
+import CurrentLocationCard from "@/components/CurrentLocationCard";
 
 // Tipagem para o hook de navegação, usando o RootStackParamList definido em src/routes/index.tsx
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'List'>;
@@ -49,6 +50,8 @@ export default function ListScreen() {
                 renderItem={({ item }) => (
                     <CityCard city={item} onPress={handlePressCity} />
                 )}
+
+                ListHeaderComponent={<CurrentLocationCard />}
 
                 // --- REMOVENDO AS BARRAS DE ROLAGEM ---
                 showsVerticalScrollIndicator={false}
