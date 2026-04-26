@@ -3,7 +3,9 @@ import { View, Text, StyleSheet} from "react-native";
 export default function Footer() {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>© 2026 Weather App • Marcelino Santos</Text>
+            <Text style={styles.text}>
+                © 2026 Weather App •<Text style={{fontWeight: 'bold'}}>Marcelino Santos</Text> 
+            </Text>
             <Text style={styles.subText}>Dados processados via FlatList Virtualization</Text>
         </View>
     );

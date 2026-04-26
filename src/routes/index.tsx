@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { WeatherData } from "@/types/weather";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { onAuthStateChanged, User } from "@firebase/auth";
 import { auth } from "@/services/firebaseConfig";
 import { View, ActivityIndicator } from "react-native";
 
 // Importações dos componentes de tela (coloque no topo do arquivo)
+import { WeatherData } from "@/types/weather";
 import ListScreen from "@/screens/ListScreen";
 import DetailsScreen from "@/screens/DetailsScreen";
 import LoginScreen from "@/screens/LoginScreen";
+import AddCityScreen from "@/screens/AddCityScreen";
 
 
 // Tipagem das Rotas
 export type RootStackParamList = {
     Login: undefined; // Rota de Login (sem parâmetros)
     List: undefined;
-    Details: { cityData: WeatherData };
+    Details: { cityName: string; cityId: string; comment: string };
+    AddCity: { cityToEdit?: any} | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -48,6 +50,7 @@ export default function Routes() {
                 <>
                     <Stack.Screen name="List" component={ListScreen} />
                     <Stack.Screen name="Details" component={DetailsScreen} />
+                    <Stack.Screen name="AddCity" component={AddCityScreen}/>
                 </>
             ) : (
                 //Fluxo não logado

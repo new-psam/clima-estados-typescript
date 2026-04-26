@@ -1,92 +1,150 @@
-import React, { useEffect, useState } from "react";
-import { CityItem, WeatherData } from "@/types/weather";
-import { getWeather } from "@/services/api";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import React from "react";
+import { 
+    ImageBackground, 
+    StyleSheet, 
+    Text, 
+    TouchableOpacity, 
+    View 
+} from "react-native";
 
-interface Props {
-    city: CityItem;
-    onPress: (data: WeatherData) => void;
+interface CityCardProps {
+    
+    cityName: string;
+    comment: string;
+    photoUrl: string;
+    onPress: () => void;
+    onEdit: () => void; // Adicione esta linha
 }
 
-export default function CityCard({ city, onPress }: Props) {
-    const [data, setData] = useState<WeatherData | null>(null);
-    const [loading, setLoading] = useState(true);
+export default function CityCard({ cityName, comment, photoUrl, onPress, onEdit }: CityCardProps) {
+    // const [data, setData] = useState<WeatherData | null>(null);
+    // const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        let isMounted = true;
-        const fetchData = async () => {
-            try {
-                const res = await getWeather(city.name);
-                if (isMounted && res) {
-                    setData(res);
-                }
-            } catch (e) {
-                console.log(`Erro ao buscar dados para ${city.name}:`, e);
-            } finally {
-                if (isMounted) {
-                    setLoading(false);
-                }
-            }
-        };
+    // useEffect(() => {
+    //     let isMounted = true;
+    //     const fetchData = async () => {
+    //         try {
+    //             const res = await getWeather(city.name);
+    //             if (isMounted && res) {
+    //                 setData(res);
+    //             }
+    //         } catch (e) {
+    //             console.log(`Erro ao buscar dados para ${city.name}:`, e);
+    //         } finally {
+    //             if (isMounted) {
+    //                 setLoading(false);
+    //             }
+    //         }
+    //     };
 
-        fetchData();
-        return () => { isMounted = false; }; // Cleanup function para o isMounted
-    }, [city.name]);
+    //     fetchData();
+    //     return () => { isMounted = false; }; // Cleanup function para o isMounted
+    // }, [city.name]);
 
-    if (loading) {
-        return (
-            <View style={[styles.card, styles.center]}>
-                <ActivityIndicator color='#1e88e5'/>
-            </View>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <View style={[styles.card, styles.center]}>
+    //             <ActivityIndicator color='#1e88e5'/>
+    //         </View>
+    //     );
+    // }
 
-    if (!data) return null;
+    // if (!data) return null;
 
     return (
-        <TouchableOpacity style={styles.card} onPress={() => onPress(data)}>
-            <View style={styles.info}>
-                <Text style={styles.cityName}>{data.name}</Text>
-                <Text style={styles.desc}>{data.weather[0].description}</Text>
-            </View>
+        <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
+            {/* Imagem de fundo da cidade */}
+            <ImageBackground
+                source={{ uri: photoUrl }}
+                style={styles.imageBackground}
+                imageStyle={{ borderRadius: 15}}
+            >
+                {/* Overlay escuro para garantir que o texto seja legível */}
+                <View style={styles.orverlay}>
+                    {/* Botão de Editar no topo do Card */}
+                    <TouchableOpacity
+                        style={styles.editButton}
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            onEdit();
+                            
+                        }}
+                    >
+                        <Feather name="edit-2" size={20} color="#fff" />
+                    </TouchableOpacity>
 
-            <View style={styles.tempGroup}>
-                <Text style={styles.currentTemp}>{Math.round(data.main.temp)}°C</Text>
-                <View style={styles.minMaxGroup}>
-                    <Text style={styles.tempMin}>↓ {Math.round(data.main.temp_min)}°C</Text>
-                    <Text style={styles.tempMax}>↑ {Math.round(data.main.temp_max)}°C</Text>
+                    <View style={styles.content}>
+                        <Text style={styles.cityName}>{cityName}</Text>
+                        <Text style={styles.comment} numberOfLines={2}>{comment}</Text>
+                    </View>
+
+                    <View style={styles.badge}>
+                        <Text style={styles.badgeText}>Ver Clima</Text>
+                    </View>
+                    
                 </View>
-            </View>
-
-            <Text style={styles.detailsButton}>Ver Detalhes</Text>
+            </ImageBackground>
         </TouchableOpacity>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#fff",
+        height: 180,
         marginHorizontal: 15,
-        marginVertical: 8,
-        borderRadius: 12,
-        padding: 15,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        elevation: 3,
-        shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        marginVertical: 10,
+        borderRadius: 15,
+        elevation: 5,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        backgroundColor: '#fff',
     },
-    center: { height: 80, justifyContent: "center"},
-    info: {flex: 1},
-    cityName: { fontSize: 18, fontWeight: "bold", color: "#333" },
-    desc: { fontSize: 14, color: "#666", textTransform: "capitalize" },
-    tempGroup: { alignItems: "flex-end", marginRight: 15 },
-    currentTemp: { fontSize: 26, fontWeight: 900, color: "#1e88e5" },
-    minMaxGroup: { flexDirection: "row", gap: 5},
-    tempMax: { fontSize: 12, color: "#f44336" },
-    tempMin: { fontSize: 12, color: "#2196f3" },
-    detailsButton: { fontSize: 10, color: "#1e88e5", fontWeight: "bold", textTransform: "uppercase"  },
+    imageBackground: {flex: 1, justifyContent: 'flex-end'},
+    orverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.4)', // Escurece a imagem para o texto branco destacar
+        borderRadius: 15,
+        padding: 15,
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        alignItems: 'flex-end'
+    },
+    content: {flex: 1, marginRight: 10},
+    cityName: { 
+        fontSize: 24, 
+        fontWeight: "bold", 
+        color: "#fff",
+        textShadowColor: 'rgba(0, 0, 0, 0.75)',
+        textShadowOffset: { width: -1, height: 1 },
+        textShadowRadius: 10
+ },
+    comment: {
+        color: '#eee',
+        fontSize: 14,
+        fontStyle: 'italic',
+        marginTop: 5
+      },
+    badge: {
+        backgroundColor: 'rgba(30, 136, 229, 0.9)',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+    },
+    badgeText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    editButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 8,
+    borderRadius: 20,
+    }
+    
 });

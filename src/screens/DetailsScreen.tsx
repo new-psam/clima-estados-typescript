@@ -1,65 +1,137 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+
+import React, { useState, useEffect} from "react";
+import { useNavigation } from '@react-navigation/native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { WeatherData } from "@/types/weather";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { getWeather } from "@/services/api";
+import { deleteFavorityCity, updateFavorityCity } from "@/services/cityService";
+
 
 // Definição do tipo da rota para o TypeScript
 type RootStackParamList = {
-    Details: { cityData: WeatherData }; // Tela de detalhes recebe um objeto com os dados do clima
+    Details: { 
+        cityName: string, 
+        cityId: string,
+        comment: string,
+        photoUrl: string,
+    }; // Tela de detalhes recebe um objeto com os dados do clima
 };
 
 type DetailsScreenRouteProp = RouteProp<RootStackParamList, 'Details'>;
 
 export default function DetailsScreen() {
+    const navigation = useNavigation()
     const route = useRoute<DetailsScreenRouteProp>(); // Hook para acessar os parâmetros da rota
-    const { cityData } = route.params; // Extrai os dados do clima passados pela navegação
+    const { cityName, cityId, comment, photoUrl } = route.params;
+
+    const [weather, setWeather] = useState<WeatherData | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadWeather() {
+            try {
+                const data = await getWeather(cityName);
+                setWeather(data);
+            } catch (error) {
+                Alert.alert("Erro", "Não foi possível carregar o clima.");
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadWeather();
+    }, [cityName]);
+
+    
+    const handleDelete = () => {
+        Alert.alert(
+            "Excluir Cidade",
+            `Tem certeza que deseja remover ${cityName} do seu diário?`,
+            [
+                {text: "Cancelar", style: "cancel"},
+                {
+                    text: "Excluir",
+                    style: "destructive",
+                    onPress: async () =>{
+                        try {
+                            // O ID da cidade precisa vir da ListScreen via rota!
+                            //const { cityId } = route.params;
+                            await deleteFavorityCity(cityId);
+                            navigation.goBack()
+                        } catch (error) {
+                            Alert.alert("Erro", "Não foi poosível excluir.");
+                        }
+                    }
+                }
+            ]
+        )
+    }
+    
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#1e88e5" />
+            </View>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
-            <Header title={`Detalhes de ${cityData.name}`} showBackButton={true} />
+            <Header title={`Detalhes de ${weather?.name || cityName}`} showBackButton={true} />
             {/* Aqui você pode renderizar os detalhes do clima usando os dados de cityData */}
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-                
-                {/* Card principal de Temperatura Atual */ }
-                <View style={styles.mainCard}>
-                    <Text style={styles.cityName}>{cityData.name}</Text>
-                    <Text style={styles.mainTemp}>{Math.round(cityData.main.temp)}°C</Text>
-                    <Text style={styles.description}>{cityData.weather[0].description}</Text>
-                </View>
+            <View style={styles.content}>
 
-                {/* Grade de Informações Técnicas */ }
-                <View style={styles.grid}>
-
-                    <View style={styles.infoBox}>
-                        <Feather name="droplet" size={24} color="#1e88e5"/>
-                        <Text style={styles.label}>Umidade</Text>
-                        <Text style={styles.value}>{cityData.main.humidity}%</Text>
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                    
+                    {/* Card principal de Temperatura Atual */ }
+                    <View style={styles.mainCard}>
+                        <Text style={styles.cityName}>{weather?.name || cityName}</Text>
+                        <Text style={styles.mainTemp}>{Math.round(weather?.main.temp ?? 0)}°C</Text>
+                        <Text style={styles.description}>{weather?.weather[0].description}</Text>
                     </View>
 
-                    <View style={styles.infoBox}>
-                        <Feather name="wind" size={24} color="#1e88e5"/>
-                        <Text style={styles.label}>Vento</Text>
-                        <Text style={styles.value}>{cityData.wind.speed} m/s</Text>  
+                    {/* Grade de Informações Técnicas */ }
+                    <View style={styles.grid}>
+
+                        <View style={styles.infoBox}>
+                            <Feather name="droplet" size={24} color="#1e88e5"/>
+                            <Text style={styles.label}>Umidade</Text>
+                            <Text style={styles.value}>{weather?.main.humidity ?? 0}%</Text>
+                        </View>
+
+                        <View style={styles.infoBox}>
+                            <Feather name="wind" size={24} color="#1e88e5"/>
+                            <Text style={styles.label}>Vento</Text>
+                            <Text style={styles.value}>{weather?.wind.speed ?? 0} m/s</Text>  
+                        </View>
+
+                        <View style={styles.infoBox}>
+                            <Ionicons name="speedometer-outline" size={24} color="#1e88e5"/>
+                            <Text style={styles.label}>Pressão</Text>
+                            <Text style={styles.value}>{weather?.main.pressure ?? 0} hPa</Text>
+                        </View>
+
+                        <View style={styles.infoBox}>
+                            <Feather name="thermometer" size={24} color="#1e88e5"/>
+                            <Text style={styles.label}>Sensação Térmica</Text>
+                            <Text style={styles.value}>{Math.round(weather?.main.feels_like ?? 0)}°C</Text>
+                        </View>
+
+                        
+
                     </View>
+                </ScrollView>
 
-                    <View style={styles.infoBox}>
-                        <Ionicons name="speedometer-outline" size={24} color="#1e88e5"/>
-                        <Text style={styles.label}>Pressão</Text>
-                        <Text style={styles.value}>{cityData.main.pressure} hPa</Text>
-                    </View>
-
-                    <View style={styles.infoBox}>
-                        <Feather name="thermometer" size={24} color="#1e88e5"/>
-                        <Text style={styles.label}>Sensação Térmica</Text>
-                        <Text style={styles.value}>{Math.round(cityData.main.temp)}°C</Text>
-                    </View>
-
-                </View>
-            </ScrollView>
-
+                {/* BOTÃO DE DELETAR FLUTUANTE (FAB) */}
+                <TouchableOpacity style={styles.deleteFab} onPress={handleDelete}>
+                    <Feather name="trash-2" size={26} color="#fff" />
+                </TouchableOpacity>
+            </View>
             <Footer />
         </SafeAreaView>
     );
@@ -81,6 +153,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
  
    },
+   content: {flex:1},
     cityName: { fontSize: 24, fontWeight: 'bold', color: '#333' },
     mainTemp: { fontSize: 64, fontWeight: 'bold', color: '#1e88e5', marginVertical: 10 },
     description: { fontSize: 18, color: '#666', textTransform: 'capitalize', letterSpacing: 1.2 },
@@ -104,4 +177,26 @@ const styles = StyleSheet.create({
     },
     label: {fontSize: 12, color: '#888', marginTop: 10, textTransform: 'uppercase', letterSpacing: 1 },
     value: {fontSize: 16, fontWeight: 'bold', color: '#333', marginTop: 5 },
+    deleteFab: {
+        position: 'absolute',
+        right: 20,
+        bottom: 30,
+        backgroundColor: '#ff4444', // Vermelho para indicar perigo/exclusão
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+    },
+    infoBoxFull: {
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 15,
+        marginTop: 10
+    },
 });

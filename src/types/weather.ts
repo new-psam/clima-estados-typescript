@@ -7,6 +7,7 @@ export interface WeatherData {
         temp_max: number;
         humidity: number;
         pressure: number;
+        feels_like: number;
     };
     weather: Array<{
         description: string;

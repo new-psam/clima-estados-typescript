@@ -9,9 +9,10 @@ import { signOut } from "firebase/auth";
 interface Props{
     title: string;
     showBackButton?: boolean;
+   
 }
 
-export default function Header({ title, showBackButton }: Props) {
+export default function Header({ title, showBackButton}: Props) {
     const navigation = useNavigation();
 
     const handleLogout = () => {
@@ -40,14 +41,16 @@ export default function Header({ title, showBackButton }: Props) {
     return (
         <View style ={styles.container}>
             <View style={styles.topRow}>
-                {showBackButton && (
-                    <TouchableOpacity 
-                        onPress={() => navigation.goBack()} 
-                        style={styles.backButton}
-                    >
-                        <Ionicons name="chevron-back" size={28} color="#fff" />
-                    </TouchableOpacity>
-                )}
+                <View style={styles.sideButtonContainer}>
+                    {showBackButton && (
+                        <TouchableOpacity 
+                            onPress={() => navigation.goBack()} 
+                            style={styles.backButton}
+                        >
+                            <Ionicons name="chevron-back" size={28} color="#fff" />
+                        </TouchableOpacity>
+                    )}
+                </View>
 
                 {/* Logo Central */}
                 <View style={styles.logoRow}>
