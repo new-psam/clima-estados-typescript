@@ -14,24 +14,31 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 
-import { WeatherData } from "@/types/weather";
 import CityCard from "@/components/CityCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { RootStackParamList } from "@/routes";
 import CurrentLocationCard from "@/components/CurrentLocationCard";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { setFavorites, setLoading } from "@/store/slices/weatherSlice";
 
 // Tipagem para o hook de navegação, usando o RootStackParamList definido em src/routes/index.tsx
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'List'>;
 
 export default function ListScreen() {
 
+    const dispatch = useDispatch();
+
     const navigation = useNavigation<NavigationProp>(); 
-    const [favorites, setFavorites] = useState<any[]>([]); // Estado para as cidades do Banco   
-    const [loading, setLoading] = useState(true);
+    // const [favorites, setFavorites] = useState<any[]>([]); // Estado para as cidades do Banco   
+    // const [loading, setLoading] = useState(true);
+
+    const { favorites, loading } = useSelector((state: RootState) => state.weather);
 
     useEffect(() => {
-        // 1. Referência da coleção e filtro pelo usuário logado
+        dispatch(setLoading(true));
+
         const q = query(
             collection(db, "favorite_cities"),
             where("userId", "==", auth.currentUser?.uid),
@@ -45,11 +52,11 @@ export default function ListScreen() {
                 citiesList.push({ id: doc.id, ...doc.data() });
             });
 
-            setFavorites(citiesList);
-            setLoading(false);
+            dispatch(setFavorites(citiesList));
+        
         }, (error) => {
-            console.error("Erro ao buscar favoritos:", error);
-            setLoading(false);
+            console.error("Erro ao buscar favoritos:",error);
+            dispatch(setLoading(false));
         });
 
         return () => unsubscribe(); //Limpa o listener ao sair da tela

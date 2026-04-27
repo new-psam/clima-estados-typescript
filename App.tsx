@@ -1,13 +1,17 @@
 import React from "react";
-import ListScreen from "@/screens/ListScreen";
-import { NavigationContainer } from "@react-navigation/native";
 import Routes from "@/routes";
+import { Provider } from "react-redux";
+import { store } from "@/store";
+import { NavigationContainer } from "@react-navigation/native";
 
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Routes />
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Routes />
+      </NavigationContainer>
+      
+    </Provider>
   );
 };
