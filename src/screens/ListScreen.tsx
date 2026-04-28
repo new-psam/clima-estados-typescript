@@ -49,7 +49,9 @@ export default function ListScreen() {
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const citiesList: any[] = [];
             querySnapshot.forEach((doc) => {
-                citiesList.push({ id: doc.id, ...doc.data() });
+                citiesList.push({
+                     id: doc.id,
+                      ...doc.data() });
             });
 
             dispatch(setFavorites(citiesList));
